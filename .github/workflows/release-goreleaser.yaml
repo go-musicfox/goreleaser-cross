@@ -39,7 +39,7 @@ jobs:
         shell: bash
         id: meta
         run: |
-          cross_tags="$(./scripts/image-tags.sh cross)"
+          cross_tags="$(./scripts/image-tags.sh musicfox)"
 
           echo 'cross_tags<<EOF' >> $GITHUB_OUTPUT
           echo "$cross_tags" >> $GITHUB_OUTPUT
@@ -61,6 +61,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
+          file: Dockerfile.musicfox
           push: true
           tags: ${{ steps.meta.outputs.cross_tags }}
           build-args: |

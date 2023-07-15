@@ -65,6 +65,42 @@ function generate_tags {
 	exit 0
 }
 
+function generate_musicfox_tags {
+	hub="alanalbert/$1"
+	ghcr="ghcr.io/go-musicfox/$1"
+
+	tag=$(make tag)
+	GORELEASER_VERSION=v$GORELEASER_VERSION
+
+	tag_minor=v$("${SCRIPT_DIR}/semver.sh" get major "$tag").$("${SCRIPT_DIR}/semver.sh" get minor "$tag")
+
+	if [[ $("${SCRIPT_DIR}"/is_prerelease.sh "$tag") == true ]]; then
+		echo "$hub:$tag-$GORELEASER_VERSION"
+		echo "$hub:$tag.$GORELEASER_VERSION"
+		echo "$hub:$tag"
+		echo "$ghcr:$tag-$GORELEASER_VERSION"
+		echo "$ghcr:$tag.$GORELEASER_VERSION"
+		echo "$ghcr:$tag"
+	else
+		echo "$hub:latest"
+		echo "$hub:$tag.$GORELEASER_VERSION"
+		echo "$hub:$tag-$GORELEASER_VERSION"
+		echo "$hub:$tag_minor.$GORELEASER_VERSION"
+		echo "$hub:$tag_minor-$GORELEASER_VERSION"
+		echo "$hub:$tag_minor"
+		echo "$hub:$tag"
+		echo "$ghcr:latest"
+		echo "$ghcr:$tag.$GORELEASER_VERSION"
+		echo "$ghcr:$tag-$GORELEASER_VERSION"
+		echo "$ghcr:$tag_minor.$GORELEASER_VERSION"
+		echo "$ghcr:$tag_minor-$GORELEASER_VERSION"
+		echo "$ghcr:$tag_minor"
+		echo "$ghcr:$tag"
+	fi
+
+	exit 0
+}
+
 case $1 in
 	cross-base)
 		generate_interim_tags "goreleaser-$1"
@@ -72,4 +108,7 @@ case $1 in
 	cross|cross-pro)
 		generate_tags "goreleaser-$1"
 		;;
+	musicfox)
+		generate_musicfox_tags "goreleaser-$1"
+		;;	
 esac
