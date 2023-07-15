@@ -16,9 +16,9 @@ COPY --from=goreleaser /usr/bin/goreleaser /usr/bin/goreleaser
 
 RUN apt update && apt install -y libtool gettext libtool-bin pkg-config && rm -rf /usr/local/osxcross
 
-COPY --from=osxcross /osxcross/target /osxcross
+COPY --from=osxcross /osxcross /osxcross
 
-RUN ln -s /osxcross /usr/local//osxcross && \
+RUN ln -s /osxcross/target /usr/local/osxcross && \
     cd /tmp && \
     wget "https://github.com/xiph/flac/releases/download/${LIBFLAC_VER}/flac-${LIBFLAC_VER}.tar.xz" && \
     tar -xf "flac-${LIBFLAC_VER}.tar.xz" && \
