@@ -1,8 +1,13 @@
-name: goreleaser
+name: musicfox
+
+defaults:
+  run:
+    shell: bash
+
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
+  push:
+    tags:
+      - v*
 
 env:
   GO111MODULE: on

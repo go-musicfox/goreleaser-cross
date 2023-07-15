@@ -3,15 +3,17 @@ include .env
 REGISTRY           ?= ghcr.io
 TAG_VERSION        ?= $(shell git describe --tags --abbrev=0)
 
-IMAGE_BASE_NAME    := goreleaser/goreleaser-cross-base:$(TAG_VERSION)
-IMAGE_NAME         := goreleaser/goreleaser-cross:$(TAG_VERSION)
-IMAGE_PRO_NAME     := goreleaser/goreleaser-cross-pro:$(TAG_VERSION)
-IMAGE_TOOLCHAINS   := goreleaser/goreleaser-cross-toolchains:$(TOOLCHAINS_VERSION)
+IMAGE_BASE_NAME     := goreleaser/goreleaser-cross-base:$(TAG_VERSION)
+IMAGE_NAME          := goreleaser/goreleaser-cross:$(TAG_VERSION)
+IMAGE_MUSICFOX_NAME := go-musicfox/goreleaser-cross:$(TAG_VERSION)
+IMAGE_PRO_NAME      := goreleaser/goreleaser-cross-pro:$(TAG_VERSION)
+IMAGE_TOOLCHAINS    := goreleaser/goreleaser-cross-toolchains:$(TOOLCHAINS_VERSION)
 ifneq ($(REGISTRY),)
-	IMAGE_BASE_NAME    := $(REGISTRY)/goreleaser/goreleaser-cross-base:$(TAG_VERSION)
-	IMAGE_NAME         := $(REGISTRY)/goreleaser/goreleaser-cross:$(TAG_VERSION)
-	IMAGE_PRO_NAME     := $(REGISTRY)/goreleaser/goreleaser-cross-pro:$(TAG_VERSION)
-	IMAGE_TOOLCHAINS   := $(REGISTRY)/goreleaser/goreleaser-cross-toolchains:$(TOOLCHAINS_VERSION)
+	IMAGE_BASE_NAME     := $(REGISTRY)/goreleaser/goreleaser-cross-base:$(TAG_VERSION)
+	IMAGE_NAME          := $(REGISTRY)/goreleaser/goreleaser-cross:$(TAG_VERSION)
+	IMAGE_MUSICFOX_NAME := $(REGISTRY)/go-musicfox/goreleaser-cross:$(TAG_VERSION)
+	IMAGE_PRO_NAME      := $(REGISTRY)/goreleaser/goreleaser-cross-pro:$(TAG_VERSION)
+	IMAGE_TOOLCHAINS    := $(REGISTRY)/goreleaser/goreleaser-cross-toolchains:$(TOOLCHAINS_VERSION)
 endif
 
 DOCKER_BUILD=docker build
@@ -42,6 +44,13 @@ goreleaser-%:
 		$(IMAGE_NAME)-$(@:goreleaser-%=%) \
 		"--build-arg TAG_VERSION=$(TAG_VERSION) \
 		--build-arg GORELEASER_VERSION=$(GORELEASER_VERSION)"
+
+.PHONY: musicfox
+musicfox:
+	docker build --platform=linux/amd64,linux/arm64 -t $(IMAGE_MUSICFOX_NAME) \
+		--build-arg TAG_VERSION=$(TAG_VERSION) \
+		--build-arg GORELEASER_VERSION=$(GORELEASER_VERSION) \
+		-f Dockerfile.musicfox .
 
 .PHONY: goreleaserpro-%
 goreleaserpro-%:
