@@ -3,6 +3,7 @@ ARG GORELEASER_VERSION
 ARG GORELEASER_DISTRIBUTION
 
 FROM ghcr.io/goreleaser/goreleaser$GORELEASER_DISTRIBUTION:v$GORELEASER_VERSION$GORELEASER_DISTRIBUTION as goreleaser
+FROM alanalbert/goreleaser-cross:v1.19.0 as osxcross
 
 FROM ghcr.io/goreleaser/goreleaser-cross-base:$TAG_VERSION
 LABEL maintainer="anhoder <anhoder@88.com>"
@@ -13,7 +14,10 @@ ENV MINGW_VERSION="20230614"
 
 COPY --from=goreleaser /usr/bin/goreleaser /usr/bin/goreleaser
 
-RUN apt update && apt install -y libtool gettext libtool-bin pkg-config
+RUN apt update && apt install -y libtool gettext libtool-bin pkg-config && rm -rf /usr/local/osxcross
+
+COPY --from=osxcross /osxcross/target /usr/local/osxcross
+
 RUN cd /tmp && \
     wget "https://github.com/xiph/flac/releases/download/${LIBFLAC_VER}/flac-${LIBFLAC_VER}.tar.xz" && \
     tar -xf "flac-${LIBFLAC_VER}.tar.xz" && \
