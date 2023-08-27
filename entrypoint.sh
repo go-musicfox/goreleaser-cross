@@ -18,10 +18,12 @@ if [[ -z "$DOCKER_CREDS_FILE" ]]; then
 fi
 
 if [[ -f $DOCKER_CREDS_FILE ]]; then
-	if cat "$DOCKER_CREDS_FILE" | jq >/dev/null 2>&1 ; then
+	if jq < "$DOCKER_CREDS_FILE" >/dev/null 2>&1 ; then
+		# shellcheck disable=SC2046
+		# shellcheck disable=SC2162
 		while read user pass registry ; do
 			echo "$pass" | docker login --username "$user" --password-stdin "$registry"
-		done <<< $(cat "$DOCKER_CREDS_FILE" | jq -Mr '.registries[] | [.user, .pass, .registry] | @tsv')
+		done <<< $(jq -Mr '.registries[] | [.user, .pass, .registry] | @tsv' < "$DOCKER_CREDS_FILE")
 	else
 		IFS=':'
 			while read -r user pass registry; do
@@ -44,16 +46,36 @@ if [ -n "$GORELEASER_GITHUB_TOKEN" ] ; then
 	export GITHUB_TOKEN=$GORELEASER_GITHUB_TOKEN
 fi
 
-if [ -n "$GITHUB_TOKEN" ]; then
-	# Log into GitHub package registry
-	echo "$GITHUB_TOKEN" | docker login docker.pkg.github.com -u docker --password-stdin
-	echo "$GITHUB_TOKEN" | docker login ghcr.io -u docker --password-stdin
+if [[ ! -f /root/.docker/config.json ]]; then
+    if [ -n "$GITHUB_TOKEN" ]; then
+        # Log into GitHub package registry
+        echo "$GITHUB_TOKEN" | docker login docker.pkg.github.com -u docker --password-stdin
+        echo "$GITHUB_TOKEN" | docker login ghcr.io -u docker --password-stdin
+    fi
+
+    if [ -n "$CI_REGISTRY_PASSWORD" ]; then
+        # Log into GitLab registry
+        echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+    fi
 fi
 
-if [ -n "$CI_REGISTRY_PASSWORD" ]; then
-	# Log into GitLab registry
-	echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-fi
+case "$(uname -m)" in
+	x86_64|amd64)
+		CC=x86_64-linux-gnu-gcc
+		CXX=x86_64-linux-gnu-g++
+		;;
+	arm64|aarch64)
+		CC=aarch64-linux-gnu-gcc
+		CXX=aarch64-linux-gnu-g++
+	;;
+	*)
+	    echo "goreleaser-cross supports only amd64/arm64 hosts"
+	    exit 1
+	    ;;
+esac
+
+export CC
+export CXX
 
 git config --global --add safe.directory "$(pwd)"
 
