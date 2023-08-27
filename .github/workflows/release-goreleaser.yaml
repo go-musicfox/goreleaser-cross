@@ -44,6 +44,12 @@ jobs:
           echo 'cross_tags<<EOF' >> $GITHUB_OUTPUT
           echo "$cross_tags" >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
+      - name: Clear disk
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Set docker push behavior
         uses: tj-actions/branch-names@v6
         id: branch-name
