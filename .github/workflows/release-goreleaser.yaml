@@ -40,7 +40,7 @@ jobs:
         shell: bash
         id: meta
         run: |
-          cross_tags="$(./scripts/image-tags.sh musicfox)"
+          cross_tags="$(./scripts/image-tags.sh musicfox ${GITHUB_REF/refs\/tags\//})"
 
           echo 'cross_tags<<EOF' >> $GITHUB_OUTPUT
           echo "$cross_tags" >> $GITHUB_OUTPUT
