@@ -1,11 +1,11 @@
-ARG TAG_VERSION
 ARG GORELEASER_VERSION
-ARG GORELEASER_DISTRIBUTION
+ARG GORELEASER_DISTRIBUTION=""
+ARG BASE_VERSION=latest
 
 FROM ghcr.io/goreleaser/goreleaser$GORELEASER_DISTRIBUTION:v$GORELEASER_VERSION$GORELEASER_DISTRIBUTION as goreleaser
 FROM alanalbert/goreleaser-cross:v1.19.0 as osxcross
 
-FROM ghcr.io/goreleaser/goreleaser-cross-base:$TAG_VERSION
+FROM ghcr.io/goreleaser/goreleaser-cross-base:$BASE_VERSION
 LABEL maintainer="anhoder <anhoder@88.com>"
 
 ENV LIBFLAC_VER="1.3.3"
@@ -23,11 +23,11 @@ RUN ln -s /osxcross/target /usr/local/osxcross && \
     wget "https://github.com/xiph/flac/releases/download/${LIBFLAC_VER}/flac-${LIBFLAC_VER}.tar.xz" && \
     tar -xf "flac-${LIBFLAC_VER}.tar.xz" && \
     cd "flac-${LIBFLAC_VER}" && \
-    # x86_64-linux-gnu 
+    # x86_64-linux-gnu
     ./autogen.sh && \
     CFLAGS='' CPPFLAGS='' LDFLAGS='' LIBS='' ./configure --host=x86_64-linux-gnu --prefix=/usr/x86_64-linux-gnu --disable-ogg && \
     make -j4 && make install && make clean && \
-    # aarch64-linux-gnu 
+    # aarch64-linux-gnu
     ./autogen.sh && \
     CFLAGS='' CPPFLAGS='' LDFLAGS='' LIBS='' ./configure --host=aarch64-linux-gnu --prefix=/usr/aarch64-linux-gnu --disable-ogg && \
     make -j4 && make install && make clean && \
