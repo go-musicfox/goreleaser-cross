@@ -73,7 +73,7 @@ musicfox-%:
 		$(foreach IMAGE,$(IMAGE_MUSICFOX_NAMES),-t $(IMAGE)-$*) \
 		--build-arg BASE_VERSION=$(TAG_VERSION)-$* \
 		--build-arg GORELEASER_VERSION=$(GORELEASER_VERSION) \
-		. -f Dockerfile.musicfox .
+		. -f Dockerfile.musicfox
 
 .PHONY: goreleaserpro-%
 goreleaserpro-%:

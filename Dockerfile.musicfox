@@ -2,8 +2,8 @@ ARG GORELEASER_VERSION
 ARG GORELEASER_DISTRIBUTION=""
 ARG BASE_VERSION=latest
 
-FROM ghcr.io/goreleaser/goreleaser$GORELEASER_DISTRIBUTION:v$GORELEASER_VERSION$GORELEASER_DISTRIBUTION as goreleaser
-FROM alanalbert/goreleaser-cross:v1.19.0 as osxcross
+FROM ghcr.io/goreleaser/goreleaser$GORELEASER_DISTRIBUTION:v$GORELEASER_VERSION$GORELEASER_DISTRIBUTION AS goreleaser
+FROM alanalbert/goreleaser-cross:v1.19.0 AS osxcross
 
 FROM ghcr.io/goreleaser/goreleaser-cross-base:$BASE_VERSION
 LABEL maintainer="anhoder <anhoder@88.com>"
