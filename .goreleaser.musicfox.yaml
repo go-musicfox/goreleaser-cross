@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema-pro.json
+# musicfox 专用构建配置：在 upstream 发布的 goreleaser-cross-base 之上，
+# 追加 FLAC/ALSA/mingw 交叉编译库，产出 go-musicfox 使用的镜像。
+# 与 upstream 的 .goreleaser.yaml 分离，避免后续合并冲突。
+version: 2
+pro: true
+
+builds:
+  - skip: true
+
+# 不创建 GitHub Release，仅构建并推送 docker 镜像（与旧的 docker/build-push-action 行为一致）。
+release:
+  disable: true
+
+dockers_v2:
+  - id: musicfox
+    images:
+      - "alanalbert/goreleaser-musicfox"
+      - "ghcr.io/go-musicfox/goreleaser-musicfox"
+    tags:
+      - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "{{ .Tag }}-{{ .Env.GORELEASER_VERSION }}"
+      - "v{{ .Major }}.{{ .Minor }}-{{ .Env.GORELEASER_VERSION }}"
+      - "latest"
+    dockerfile: Dockerfile.musicfox
+    # osxcross 依赖 (alanalbert/goreleaser-cross:v1.19.0) 仅提供 amd64，与旧构建保持一致。
+    platforms:
+      - linux/amd64
+    build_args:
+      # CI 中历史行为为使用 goreleaser-cross-base:latest（BASE_VERSION 未显式传入，取默认 latest）。
+      BASE_VERSION: "latest"
+      GORELEASER_VERSION: "{{ .Env.GORELEASER_VERSION }}"
+
+changelog:
+  disable: true

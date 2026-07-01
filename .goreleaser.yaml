@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema-pro.json
+version: 2
+pro: true
+
+builds:
+  - skip: true
+
+# NOTE: needs to be run with `--parallelism=1`, as goreleaser and
+# goreleaser-pro depends on base.
+dockers_v2:
+  - id: base
+    images:
+      - "goreleaser/goreleaser-cross-base"
+      - "ghcr.io/goreleaser/goreleaser-cross-base"
+    tags:
+      - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "latest"
+    dockerfile: Dockerfile.base
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    extra_files:
+      - docker.sources
+      - entrypoint.sh
+    build_args:
+      GO_VERSION: "{{ .Env.GO_VERSION }}"
+      TINI_VERSION: "{{ .Env.TINI_VERSION }}"
+      COSIGN_VERSION: "{{ .Env.COSIGN_VERSION }}"
+      TOOLCHAINS_TAG: "{{ .Env.TOOLCHAINS_VERSION }}"
+  - id: goreleaser
+    images:
+      - "goreleaser/goreleaser-cross"
+      - "ghcr.io/goreleaser/goreleaser-cross"
+    tags:
+      - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "{{ .Tag }}-{{ .Env.GORELEASER_VERSION }}"
+      - "v{{ .Major }}.{{ .Minor }}-{{ .Env.GORELEASER_VERSION }}"
+      - "latest"
+    dockerfile: Dockerfile
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    build_args:
+      BASE_VERSION: "{{ .Tag }}"
+      GORELEASER_VERSION: "{{ .Env.GORELEASER_VERSION }}"
+
+  - id: goreleaser-pro
+    images:
+      - "goreleaser/goreleaser-cross-pro"
+      - "ghcr.io/goreleaser/goreleaser-cross-pro"
+    tags:
+      - "{{ .Tag }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "{{ .Tag }}-{{ .Env.GORELEASER_VERSION }}"
+      - "v{{ .Major }}.{{ .Minor }}-{{ .Env.GORELEASER_VERSION }}"
+      - "latest"
+    dockerfile: Dockerfile
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    build_args:
+      BASE_VERSION: "{{ .Tag }}"
+      GORELEASER_VERSION: "{{ .Env.GORELEASER_VERSION }}"
+      GORELEASER_DISTRIBUTION: "-pro"
+
+docker_signs:
+  - cmd: cosign
+    id: cosign/local
+    if: '{{ eq (envOrDefault "COSIGN_MODE" "") "local" }}'
+    output: true
+    args:
+      - "sign"
+      - "--key"
+      - "cosign.key"
+      - "${artifact}@${digest}"
+      - "--yes"
+  - cmd: cosign
+    id: cosign/ci
+    if: '{{ ne (envOrDefault "COSIGN_MODE" "") "local" }}'
+    output: true
+    args:
+      - "sign"
+      - "${artifact}@${digest}"
+      - "--yes"
+
+changelog:
+  use: github
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
