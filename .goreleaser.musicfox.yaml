@@ -1,9 +1,9 @@
-# yaml-language-server: $schema=https://goreleaser.com/static/schema-pro.json
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 # musicfox 专用构建配置：在 upstream 发布的 goreleaser-cross-base 之上，
 # 追加 FLAC/ALSA/mingw 交叉编译库，产出 go-musicfox 使用的镜像。
 # 与 upstream 的 .goreleaser.yaml 分离，避免后续合并冲突。
+# 仅用 dockers_v2（开源版即可，无需 goreleaser-pro / GORELEASER_KEY）。
 version: 2
-pro: true
 
 builds:
   - skip: true
