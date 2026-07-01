@@ -1,9 +1,9 @@
-ARG GORELEASER_VERSION
+ARG GORELEASER_VERSION=latest
 ARG GORELEASER_DISTRIBUTION=""
 ARG BASE_VERSION=latest
 
 FROM ghcr.io/goreleaser/goreleaser$GORELEASER_DISTRIBUTION:$GORELEASER_VERSION$GORELEASER_DISTRIBUTION AS goreleaser
-FROM alanalbert/goreleaser-cross:v1.19.0 AS osxcross
+# FROM alanalbert/goreleaser-cross:v1.19.0 AS osxcross
 
 FROM ghcr.io/goreleaser/goreleaser-cross-base:$BASE_VERSION
 LABEL maintainer="anhoder <anhoder@88.com>"
@@ -11,15 +11,16 @@ LABEL maintainer="anhoder <anhoder@88.com>"
 ENV LIBFLAC_VER="1.3.3"
 ENV LIBALSA_VER="1.2.2"
 ENV MINGW_VERSION="20230614"
+ENV OSX_CROSS_PATH=/usr/local/osxcross
 
 COPY --from=goreleaser /usr/bin/goreleaser /usr/bin/goreleaser
 
-RUN apt update && apt install -y libtool gettext libtool-bin pkg-config && rm -rf /usr/local/osxcross
+RUN apt update && apt install -y libtool gettext libtool-bin pkg-config
 
-COPY --from=osxcross /osxcross /osxcross
+# COPY --from=osxcross /osxcross /osxcross
 
-RUN ln -s /osxcross/target /usr/local/osxcross && \
-    cd /tmp && \
+# RUN ln -s /osxcross/target /usr/local/osxcross && \
+RUN cd /tmp && \
     wget "https://github.com/xiph/flac/releases/download/${LIBFLAC_VER}/flac-${LIBFLAC_VER}.tar.xz" && \
     tar -xf "flac-${LIBFLAC_VER}.tar.xz" && \
     cd "flac-${LIBFLAC_VER}" && \
